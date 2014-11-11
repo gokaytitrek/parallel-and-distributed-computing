@@ -27,19 +27,21 @@ public class Server4SingleClient {
 		BufferedReader socketIn = null;
 		
 		try {
-			//wait for client connections
-			System.out.println("Server socket initialized.\nWaiting for a client connection.");
-			clientSocket = serverSocket.accept();
-			
-			//let us see who connected
-			String clientName = clientSocket.getInetAddress().getHostName();
-			System.out.println(clientName + " established a connection.");
-			System.out.println();
-			
-			//will use socketOut to send text to the server over the socket
-			socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
-			//will use socketIn to receive text from the server over the socket
-			socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                       
+                            //wait for client connections
+                            System.out.println("Server socket initialized.\nWaiting for a client connection.");
+                            clientSocket = serverSocket.accept();
+
+                            //let us see who connected
+                            String clientName = clientSocket.getInetAddress().getHostName();
+                            System.out.println(clientName + " established a connection.");
+                            System.out.println();
+
+                            //will use socketOut to send text to the server over the socket
+                            socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
+                            //will use socketIn to receive text from the server over the socket
+                            socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        
 		} catch (IOException e) {
 			System.out.println("Cannot get I/O for the connection.");
 			e.printStackTrace();
@@ -52,14 +54,14 @@ public class Server4SingleClient {
 		
 		
 		//close all streams
-		socketOut.close();
-		try {
-			socketIn.close();
-			clientSocket.close();
-			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//socketOut.close();
+		//try {
+		//	socketIn.close();
+		//	clientSocket.close();
+		//	serverSocket.close();
+		//} catch (IOException e) {
+		//	e.printStackTrace();
+		//}
 	}
 	
 	

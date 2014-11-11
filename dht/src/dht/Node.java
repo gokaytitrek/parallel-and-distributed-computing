@@ -6,6 +6,7 @@
 package dht;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -17,7 +18,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import server.Server4SingleClient;
+import server.ServerThread;
 /**
  * 
  * @author Gokay
@@ -33,46 +34,28 @@ public class Node implements Runnable{
 	protected boolean _firstNode;
 	protected ArrayList<Node> _nodeList=new ArrayList<Node>();
 	protected ServerSocket _serverSocket;
-
+        private Socket clientSocket;
+        private PrintWriter socketOut;
+        private BufferedReader socketIn;
+        
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
-		this._name = getHash(Name);
+		this._name = Name;
 		this._portNumber = PortNumber;
 		this._portNumberOtherNode = PortNumberOtherNode;
 		this._setupNode = SetupNode;
 		this._firstNode = Firstnode;
 	}
-
-	private String getHash(String Name) {
-		try {
-			MessageDigest m = MessageDigest.getInstance("MD5");
-			m.reset();
-			m.update(Name.getBytes());
-			byte[] digest = m.digest();
-			BigInteger bigInt = new BigInteger(1, digest);
-			String hashtext = bigInt.toString(16);
-			// Now we need to zero pad it if you actually want the full 32
-			// chars.
-			while (hashtext.length() < 32) {
-				hashtext = "0" + hashtext;
-			}
-			return hashtext;
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
 	
 	public void connectOtherNode()
 	{
-		Socket clientSocket = null;
-		PrintWriter socketOut = null;
-		BufferedReader socketIn = null;
+		clientSocket = null;
+		socketOut = null;
+		socketIn = null;
 		
 		try {
 			//create socket and connect to the server
-			clientSocket = new Socket(serverName, this._portNumberOtherNode);
+			clientSocket = new Socket(serverName, this._portNumberOtherNode );
 			//will use socketOut to send text to the server over the socket
 			socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
 			//will use socketIn to receive text from the server over the socket
@@ -95,8 +78,37 @@ public class Node implements Runnable{
 			e.printStackTrace();
 		}
 		System.out.println("Server's response was: \n\t\"" + response + "\"");
-		
-		//close all streams
+	}
+        
+        public void closeConnection()
+        {
+                 
+                try {
+			//DataOutputStream dOut = new DataOutputStream(clientSocket.getOutputStream());
+
+                        // Send first message
+                        //dOut.writeByte(1);
+                        //dOut.writeUTF("This is the first type of message.");
+			//will use socketOut to send text to the server over the socket
+			socketOut.println("sdeneme");
+			//will use socketIn to receive text from the server over the socket
+			socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		} catch(UnknownHostException e) { //if serverName cannot be resolved to an address
+			System.out.println("Who is " + serverName + "?");
+			e.printStackTrace();
+			System.exit(0);
+		} catch (IOException e) {
+			System.out.println("Cannot get I/O for the connection.");
+			e.printStackTrace();
+			System.exit(0);
+		}
+                String response = null;
+		try {
+			response = socketIn.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+                //close all streams
 		socketOut.close();
 		try {
 			socketIn.close();
@@ -104,14 +116,12 @@ public class Node implements Runnable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
-	}
+        }
 
 	@Override
 	public void run() {
-		Server4SingleClient serverSocket=new Server4SingleClient();
+		//Server4SingleClient serverSocket=new Server4SingleClient();
+                ServerThread    serverSocket=new ServerThread();
 		serverSocket.establishConnection(this._serverSocket, this._portNumber,this._name);
 	}
-
 }
