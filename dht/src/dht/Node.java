@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import server.Server4SingleClient;
+import server.ServerThread;
 /**
  * 
  * @author Gokay
@@ -33,6 +34,9 @@ public class Node implements Runnable{
 	protected boolean _firstNode;
 	protected ArrayList<Node> _nodeList=new ArrayList<Node>();
 	protected ServerSocket _serverSocket;
+        protected Socket clientSocket;
+	protected PrintWriter socketOut;
+	protected BufferedReader socketIn;
 
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
@@ -66,10 +70,6 @@ public class Node implements Runnable{
 	
 	public void connectOtherNode()
 	{
-		Socket clientSocket = null;
-		PrintWriter socketOut = null;
-		BufferedReader socketIn = null;
-		
 		try {
 			//create socket and connect to the server
 			clientSocket = new Socket(serverName, this._portNumberOtherNode);
@@ -86,7 +86,8 @@ public class Node implements Runnable{
 			e.printStackTrace();
 			System.exit(0);
 		}
-
+                    
+                socketOut.println("Deneme");
 		System.out.println("Message sent, waiting for the server's response.");
 		String response = null;
 		try {
@@ -96,21 +97,31 @@ public class Node implements Runnable{
 		}
 		System.out.println("Server's response was: \n\t\"" + response + "\"");
 		
-		//close all streams
-		socketOut.close();
-		try {
-			socketIn.close();
-			clientSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 		
 		
 	}
+        
+        public void closeConnection()
+        {
+            socketOut.println("close");
+            
+            //close all streams
+            socketOut.close();
+            try {
+                    socketIn.close();
+                    clientSocket.close();
+            } catch (IOException e) {
+                    e.printStackTrace();
+            }
+            
+        }
 
 	@Override
 	public void run() {
-		Server4SingleClient serverSocket=new Server4SingleClient();
+		//Server4SingleClient serverSocket=new Server4SingleClient();
+            
+                ServerThread    serverSocket=new ServerThread();
 		serverSocket.establishConnection(this._serverSocket, this._portNumber,this._name);
 	}
 
