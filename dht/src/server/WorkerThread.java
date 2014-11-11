@@ -36,11 +36,11 @@ public class WorkerThread implements Runnable{
 		 * This continues for 3 rounds.
 		 */
 		
-                int i=0;
+                //int i=0;
 		String message = null;
                 boolean x=true;
                 while (x) {                
-                    System.out.println("Round (" + (i+1) + ")");
+                    //System.out.println("Round (" + (i+1) + ")");
                     System.out.println("Waiting for a message from the client.");
                     
                     try {
@@ -48,7 +48,8 @@ public class WorkerThread implements Runnable{
                     } catch (IOException e) {
                             e.printStackTrace();
                     }
-                    socketOut.println("You said: " + message);
+                    //socketOut.println("You said: " + message);
+                    socketOut.println("Baglandın");
                     System.out.println("Client's message was: \n\t\"" + message + "\"");
                     System.out.println();
                     

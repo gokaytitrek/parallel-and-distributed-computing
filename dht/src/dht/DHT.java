@@ -25,13 +25,24 @@ public class DHT {
 //        (new Thread(newNode2)).start();
 //        
         setupNode.connectOtherNode();
-        //firstNode.connectOtherNode();
+        firstNode.connectOtherNode();
         
-        setupNode.closeConnection();
+        //setupNode.socketOut.println("Denemee asdadsadsads1");
+        //firstNode.socketOut.println("Denemee asdadsadsads2222");
         
-        setupNode.connectOtherNode();
-        setupNode.closeConnection();
+        Node firstNode2=new Node("3",4447,4444,true,true);
+
+        (new Thread(firstNode2)).start();
         
+        
+        //setupNode.closeConnection();
+        firstNode.closeConnection();
+        
+        firstNode._portNumberOtherNode = 4447;
+        firstNode.connectOtherNode();
+        
+        firstNode2.connectOtherNode();
+        //firstNode2.closeConnection();
 //        
 //        newNode1.connectOtherNode();
 //        newNode2.connectOtherNode();

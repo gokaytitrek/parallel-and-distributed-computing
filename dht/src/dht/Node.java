@@ -40,7 +40,7 @@ public class Node implements Runnable{
 
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
-		this._name = getHash(Name);
+		this._name = Name;
 		this._portNumber = PortNumber;
 		this._portNumberOtherNode = PortNumberOtherNode;
 		this._setupNode = SetupNode;
@@ -87,8 +87,8 @@ public class Node implements Runnable{
 			System.exit(0);
 		}
                     
-                socketOut.println("Deneme");
-		System.out.println("Message sent, waiting for the server's response.");
+                socketOut.println(this._portNumberOtherNode + " Nolu Porta Baglanmaya Calısıyorum. Benim Port Numaram " + this._portNumber);
+		//System.out.println("Message sent, waiting for the server's response.");
 		String response = null;
 		try {
 			response = socketIn.readLine();
@@ -104,6 +104,7 @@ public class Node implements Runnable{
         
         public void closeConnection()
         {
+            System.out.println(this._portNumberOtherNode + " Nolu Portla Baglantımı Koparıyorum. Benim Port Numaram " + this._portNumber);
             socketOut.println("close");
             
             //close all streams
@@ -116,7 +117,12 @@ public class Node implements Runnable{
             }
             
         }
-
+        /*
+        public insertNode()
+        {
+            
+        }
+*/
 	@Override
 	public void run() {
 		//Server4SingleClient serverSocket=new Server4SingleClient();
