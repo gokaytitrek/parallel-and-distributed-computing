@@ -41,7 +41,7 @@ public class WorkerThread implements Runnable{
                 boolean x=true;
                 while (x) {                
                     //System.out.println("Round (" + (i+1) + ")");
-                    System.out.println("Waiting for a message from the client.");
+                    //System.out.println("Waiting for a message from the client.");
                     
                     try {
                             message = socketIn.readLine();
@@ -49,10 +49,14 @@ public class WorkerThread implements Runnable{
                             e.printStackTrace();
                     }
                     //socketOut.println("You said: " + message);
-                    socketOut.println("Baglandın");
-                    System.out.println("Client's message was: \n\t\"" + message + "\"");
-                    System.out.println();
-                    
+                    if(message.equals("NextPort"))
+                        socketOut.println(clientSocket.getLocalPort());
+                    else
+                    {
+                        socketOut.println("Baglandın");
+                        System.out.println("Client's message was: \n\t\"" + message + "\"");
+                        System.out.println();
+                    }
                     if(message.equals("close"))
                         x=false;
                 } 

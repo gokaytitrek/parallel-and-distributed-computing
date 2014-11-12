@@ -17,7 +17,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import server.Server4SingleClient;
 import server.ServerThread;
 /**
  * 
@@ -37,6 +36,7 @@ public class Node implements Runnable{
         protected Socket clientSocket;
 	protected PrintWriter socketOut;
 	protected BufferedReader socketIn;
+        //protected Node  _nextNode;
 
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
@@ -117,12 +117,36 @@ public class Node implements Runnable{
             }
             
         }
-        /*
-        public insertNode()
+        
+        public void insertNode(Node insertPointNode)
         {
-            
+            insertPointNode.closeConnection();
+            this._portNumberOtherNode = insertPointNode._portNumberOtherNode;
+            //this._nextNode = a;
+            insertPointNode._portNumberOtherNode=this._portNumber;
+            //a._nextNode = this;
+            insertPointNode.connectOtherNode();
+            this.connectOtherNode();
         }
-*/
+        
+        public void lookUp(String Name) throws IOException
+        {
+            int portNumber = this._portNumber;
+            int portNumberOtherNode = this._portNumberOtherNode;
+            /*
+            while(portNumber != portNumberOtherNode)
+            {
+                this.socketOut.println("NextPort");
+                
+                
+            }
+              */      
+            
+            System.out.println("this Port "+this._portNumber);
+            
+            System.out.println(socketIn.readLine());
+        }
+
 	@Override
 	public void run() {
 		//Server4SingleClient serverSocket=new Server4SingleClient();

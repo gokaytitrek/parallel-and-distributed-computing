@@ -25,7 +25,7 @@ public class ServerThread {
             try {
                     while(true) { //infinite loop - terminate manually
                             //wait for client connections
-                            System.out.println("Waiting for a client connection.");
+                            //System.out.println("Waiting for a client connection.");
                             try {
                                     clientSocket = serverSocket.accept();
                             } catch (IOException e) {
@@ -34,8 +34,8 @@ public class ServerThread {
                             }
 
                             //let us see who connected
-                            String clientName = clientSocket.getInetAddress().getHostName();
-                            System.out.println(clientName + " established a connection.");
+                            //String clientName = clientSocket.getInetAddress().getHostName();
+                            //System.out.println(clientName + " established a connection.");
                             System.out.println();
 
                             //assign a worker thread
