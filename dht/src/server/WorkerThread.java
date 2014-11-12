@@ -48,18 +48,21 @@ public class WorkerThread implements Runnable{
                     } catch (IOException e) {
                             e.printStackTrace();
                     }
+
+                    if(message.equals("close"))
+                    {
+                        socketOut.println("Connection Closed");
+                        x=false;
+                    } 
                     //socketOut.println("You said: " + message);
                     if(message.equals("NextPort"))
                         socketOut.println(clientSocket.getLocalPort());
                     else
                     {
-                        socketOut.println("Baglandın");
-                        System.out.println("Client's message was: \n\t\"" + message + "\"");
-                        System.out.println();
+                        socketOut.println("Connected");
+                        //System.out.println();
                     }
-                    if(message.equals("close"))
-                        x=false;
-                } 
+                }
 		
 		//close all streams
 		socketOut.close();

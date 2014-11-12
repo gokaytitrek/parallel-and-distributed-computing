@@ -16,6 +16,8 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import server.ServerThread;
 /**
@@ -36,7 +38,6 @@ public class Node implements Runnable{
         protected Socket clientSocket;
 	protected PrintWriter socketOut;
 	protected BufferedReader socketIn;
-        //protected Node  _nextNode;
 
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
@@ -86,27 +87,34 @@ public class Node implements Runnable{
 			e.printStackTrace();
 			System.exit(0);
 		}
-                    
-                socketOut.println(this._portNumberOtherNode + " Nolu Porta Baglanmaya Calısıyorum. Benim Port Numaram " + this._portNumber);
-		//System.out.println("Message sent, waiting for the server's response.");
+                String message=   "try to connect: Ports: " +  this._portNumber + " -> " +this._portNumberOtherNode;
+                socketOut.println(message);
+		System.out.println(message);
 		String response = null;
 		try {
 			response = socketIn.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Server's response was: \n\t\"" + response + "\"");
-		
+		//System.out.println("Server's response was: \n\t\"" + response + "\"");
+                System.out.println(response);
+                System.out.println();
 
-		
-		
 	}
         
         public void closeConnection()
         {
-            System.out.println(this._portNumberOtherNode + " Nolu Portla Baglantımı Koparıyorum. Benim Port Numaram " + this._portNumber);
+            System.out.println("try to close connection: Ports: " + this._portNumber + " -> "+ this._portNumberOtherNode );
             socketOut.println("close");
             
+            String response = null;
+            try {
+                response = socketIn.readLine();
+            } catch (IOException ex) {
+                Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            System.out.println(response);
+            System.out.println();
             //close all streams
             socketOut.close();
             try {
@@ -133,15 +141,15 @@ public class Node implements Runnable{
         {
             int portNumber = this._portNumber;
             int portNumberOtherNode = this._portNumberOtherNode;
+            
             /*
             while(portNumber != portNumberOtherNode)
             {
                 this.socketOut.println("NextPort");
-                
-                
+   
             }
-              */      
-            
+            */
+
             System.out.println("this Port "+this._portNumber);
             
             System.out.println(socketIn.readLine());
@@ -149,8 +157,6 @@ public class Node implements Runnable{
 
 	@Override
 	public void run() {
-		//Server4SingleClient serverSocket=new Server4SingleClient();
-            
                 ServerThread    serverSocket=new ServerThread();
 		serverSocket.establishConnection(this._serverSocket, this._portNumber,this._name);
 	}

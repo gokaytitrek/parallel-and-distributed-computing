@@ -12,6 +12,7 @@ public class DHT {
     	(new Thread(setupNode)).start();
     	(new Thread(firstNode)).start();
         
+        /*
         firstNode._nodeList.add(new Node("5",4491,4445,false,false));
         firstNode._nodeList.add(new Node("50",4492,4445,false,false));
         firstNode._nodeList.add(new Node("15",4493,4445,false,false));
@@ -19,6 +20,7 @@ public class DHT {
         firstNode._nodeList.add(new Node("13",4495,4445,false,false));
         firstNode._nodeList.add(new Node("14",4496,4445,false,false));
         firstNode._nodeList.add(new Node("11",4497,4445,false,false));
+        */
         
         setupNode.connectOtherNode();
         firstNode.connectOtherNode();
@@ -36,30 +38,9 @@ public class DHT {
         
         firstNode3.insertNode(firstNode);
         
-        firstNode.lookUp("1");
-        firstNode.lookUp("2");
-        firstNode.lookUp("3");
-        //setupNode.closeConnection();
-        //firstNode.closeConnection();
+        //firstNode.lookUp("2");
+        //firstNode.lookUp("3");
+
         
-        //firstNode._portNumberOtherNode = 4447;
-        //firstNode.connectOtherNode();
-        
-        //firstNode2.connectOtherNode();
-        //firstNode2.closeConnection();
-//        
-//        newNode1.connectOtherNode();
-//        newNode2.connectOtherNode();
-        
-//        try {
-//        	if(firstNode._serverSocket!=null)	
-//        		firstNode._serverSocket.close();
-//  		} catch (IOException e) {
-//  			// TODO Auto-generated catch block
-//  			e.printStackTrace();
-//  		}
-//        
-//        firstNode._portNumberOtherNode=firstNode._nodeList.get(0)._portNumber;
-//        (new Thread(firstNode)).start();
     }    
 }

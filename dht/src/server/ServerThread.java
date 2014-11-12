@@ -36,7 +36,7 @@ public class ServerThread {
                             //let us see who connected
                             //String clientName = clientSocket.getInetAddress().getHostName();
                             //System.out.println(clientName + " established a connection.");
-                            System.out.println();
+                            //System.out.println();
 
                             //assign a worker thread
                             WorkerThread w = new WorkerThread(clientSocket);
