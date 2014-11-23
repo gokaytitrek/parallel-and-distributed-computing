@@ -16,8 +16,10 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.Object;
 
 import server.ServerThread;
 /**
@@ -46,6 +48,21 @@ public class Node implements Runnable{
 		this._portNumberOtherNode = PortNumberOtherNode;
 		this._setupNode = SetupNode;
 		this._firstNode = Firstnode;
+                
+                if (this._firstNode)
+                {
+                    int portNumber = 4500;
+                    Random r=new Random();
+                    int j=0;
+                    while (j<255)
+                    {
+                        int i= r.nextInt(255);
+                        if(!this._nodeList.contains(new Node(Integer.toString(i), portNumber, 0, false, false)) && !Integer.toString(i).equals("0") && !Integer.toString(i).equals("1"))
+                            this._nodeList.add(new Node(Integer.toString(i), portNumber, 0, false, false));
+                        j++;
+                        portNumber++;
+                    }
+                }
 	}
 
 	private String getHash(String Name) {
@@ -160,5 +177,20 @@ public class Node implements Runnable{
                 ServerThread    serverSocket=new ServerThread();
 		serverSocket.establishConnection(this._serverSocket, this._portNumber,this._name);
 	}
+        
+        @Override
+        public boolean equals(Object object)
+        {
+            boolean isEqual= false;
+
+            if (object != null && object instanceof Node)
+            {
+                isEqual = this._name.equals(((Node)object)._name);
+            }
+
+            return isEqual;
+        }
+
+
 
 }
