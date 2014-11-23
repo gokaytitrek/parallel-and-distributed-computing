@@ -49,25 +49,25 @@ public class Node implements Runnable{
 	}
 
 	private String getHash(String Name) {
-		try {
-			MessageDigest m = MessageDigest.getInstance("MD5");
-			m.reset();
-			m.update(Name.getBytes());
-			byte[] digest = m.digest();
-			BigInteger bigInt = new BigInteger(1, digest);
-			String hashtext = bigInt.toString(16);
-			// Now we need to zero pad it if you actually want the full 32
-			// chars.
-			while (hashtext.length() < 32) {
-				hashtext = "0" + hashtext;
-			}
-			return hashtext;
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
+            try {
+                    MessageDigest m = MessageDigest.getInstance("MD5");
+                    m.reset();
+                    m.update(Name.getBytes());
+                    byte[] digest = m.digest();
+                    BigInteger bigInt = new BigInteger(1, digest);
+                    String hashtext = bigInt.toString(2);
+                    // Now we need to zero pad it if you actually want the full 32
+                    // chars.
+                    //while (hashtext.length() < 32) {
+                    //	hashtext = "0" + hashtext;
+                    //}
+                    return hashtext.substring(hashtext.length()-8, hashtext.length());
+            } catch (NoSuchAlgorithmException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return null;
+            }
+        }
 	
 	public void connectOtherNode()
 	{
