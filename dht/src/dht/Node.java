@@ -41,6 +41,12 @@ public class Node implements Runnable{
 	protected PrintWriter socketOut;
 	protected BufferedReader socketIn;
 
+        public Node()
+        {
+            this._firstNode=false;
+            this._setupNode=false;
+        }
+        
 	public Node(String Name, int PortNumber, int PortNumberOtherNode,
 			boolean SetupNode, boolean Firstnode) {
 		this._name = Name;
@@ -48,7 +54,7 @@ public class Node implements Runnable{
 		this._portNumberOtherNode = PortNumberOtherNode;
 		this._setupNode = SetupNode;
 		this._firstNode = Firstnode;
-                
+
                 if (this._firstNode)
                 {
                     int portNumber = 4500;
@@ -154,11 +160,78 @@ public class Node implements Runnable{
             this.connectOtherNode();
         }
         
-        public void lookUp(String Name) throws IOException
+        public Node lookUp(String Name) throws IOException
         {
-            int portNumber = this._portNumber;
-            int portNumberOtherNode = this._portNumberOtherNode;
-            
+            //Daha once aktive edilmemisse ilk olarak firstNode da varmı kontrol ediyor.
+            Node x=null;
+            if(this._firstNode)
+            {
+                for(Node n : this._nodeList)
+                {
+                    if(n._name.equals(Name))
+                    {
+                        
+                        x = n;
+                        break;
+                    }
+                }
+                if(x!=null)
+                {
+                    for(Node n : this._nodeList)
+                    {
+                        if(
+                                (
+                                    getHash(x._name).compareTo(getHash(n._name)) == -1 
+                                    ||
+                                    getHash(x._name).compareTo(getHash(n._name)) == 0
+                                )
+                                && !n._name.equals("0") 
+                                && !n._name.equals("1")
+                          )
+                            x._nodeList.add(n);
+                    }
+                    
+                    for(Node n : x._nodeList)
+                        this._nodeList.remove(n);
+                   
+                    return x;
+                }
+            }
+            this.socketOut.println("NextName");
+            String nextNodeName=socketIn.readLine();
+            Node nextNode=new Node();
+            while(!nextNode._firstNode || !nextNode._setupNode)
+            {
+                
+                nextNode = DHT.hash.get(getHash(nextNodeName));
+                
+                if(
+                    (
+                    getHash(nextNode._name).compareTo(getHash(Name)) == 1 
+                    ||
+                    getHash(nextNode._name).compareTo(getHash(Name)) == 0
+                    )
+                     && !nextNode._name.equals("0") 
+                     && !nextNode._name.equals("1")
+                  )
+                {
+                    //Aradıgım Node
+                    //Gelen Nameden daha buyuk yada esit
+                }
+                else if ( nextNode._name.equals("0") 
+                     || nextNode._name.equals("1"))
+                {
+                    return null;
+                }
+                else
+                {
+                    nextNode.socketOut.println("NextName");
+                    nextNodeName=socketIn.readLine();
+                }
+                
+                
+            }
+            return null;
             /*
             while(portNumber != portNumberOtherNode)
             {
@@ -167,13 +240,14 @@ public class Node implements Runnable{
             }
             */
 
-            System.out.println("this Port "+this._portNumber);
+            //System.out.println("this Port "+this._portNumber);
             
-            System.out.println(socketIn.readLine());
+            //System.out.println(socketIn.readLine());
         }
 
 	@Override
 	public void run() {
+                DHT.hash.put(getHash(this._name), this);
                 ServerThread    serverSocket=new ServerThread();
 		serverSocket.establishConnection(this._serverSocket, this._portNumber,this._name);
 	}
@@ -190,7 +264,4 @@ public class Node implements Runnable{
 
             return isEqual;
         }
-
-
-
 }
