@@ -39,7 +39,7 @@ public class ServerThread {
                             //System.out.println();
 
                             //assign a worker thread
-                            WorkerThread w = new WorkerThread(clientSocket);
+                            WorkerThread w = new WorkerThread(clientSocket,name);
                             new Thread(w).start();
                     }
             } finally {

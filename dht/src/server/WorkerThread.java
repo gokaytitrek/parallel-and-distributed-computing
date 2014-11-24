@@ -9,8 +9,10 @@ import java.util.Scanner;
 
 public class WorkerThread implements Runnable{
 	private Socket clientSocket;
-	public WorkerThread(Socket s) {
+        private String name;
+	public WorkerThread(Socket s,String name) {
 		clientSocket = s;
+                this.name = name;
 	}
 	public void run() {
 		//taken from Server4SingleClient
@@ -57,6 +59,8 @@ public class WorkerThread implements Runnable{
                     //socketOut.println("You said: " + message);
                     if(message.equals("NextPort"))
                         socketOut.println(clientSocket.getLocalPort());
+                    else if(message.equals("NextName"))
+                        socketOut.println(this.name);
                     else
                     {
                         socketOut.println("Connected");
