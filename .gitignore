@@ -12,3 +12,5 @@
 hs_err_pid*
 /VectorClock/nbproject/private/
 /CausallyOrderedMulticastComm/nbproject/private/
+/CausallyOrderedMulticastComm/build/
+/CausallyOrderedMulticastComm/dist/
