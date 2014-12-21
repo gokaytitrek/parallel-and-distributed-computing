@@ -5,7 +5,7 @@
  */
 package GUI;
 
-import causallyOrderedMulticastComm.Node;
+import causallyOrderedMulticastComm.*;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -67,7 +67,7 @@ public class MessageForm {
           public void actionPerformed(ActionEvent e) {
               try {
                   //_textArea.append(_textMessage.getText() + "\n");
-                  _node.sendMessage(_textMessage.getText());
+                  _node.sendMessage(new MessageContent(_node._nodeName, _textMessage.getText(), _node._localTime));
               } catch (IOException | InterruptedException ex) {
                   Logger.getLogger(MessageForm.class.getName()).log(Level.SEVERE, null, ex);
               }
