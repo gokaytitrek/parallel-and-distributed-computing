@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import static java.lang.System.arraycopy;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -31,7 +32,9 @@ public class Node implements Runnable{
         private MulticastSocket _multicastSocket;
 	public String _nodeName;
 	private int _portNumber = 6000;
-        protected ArrayList<ArrayList<Integer>> _queue;
+        public Integer  _ID;
+        public Integer[] _localTime;
+        protected ArrayList<Integer[]> _queue;
         private InetAddress _multicastAddress;
         private InetAddress _localHost;
         private int _sleepTime;
@@ -39,7 +42,8 @@ public class Node implements Runnable{
 
     public Node(String Name,int SleepTime) throws UnknownHostException {
         
-       
+            this._ID = ++Main._nodeSize;
+            checkVectorClockSize();
             this._nodeName = Name;
             this._sleepTime = SleepTime;
             this._group = InetAddress.getByName("228.5.6.7");
@@ -50,7 +54,7 @@ public class Node implements Runnable{
             _textArea.setEditable(false);
     }
     
-    public void sendMessage(String Message) throws IOException, InterruptedException
+    public void sendMessage(MessageContent Message) throws IOException, InterruptedException
     {
         DatagramSocket dgramSocket = new DatagramSocket();
         DatagramPacket packet = null;
@@ -60,7 +64,7 @@ public class Node implements Runnable{
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream (bos);
-        out.writeObject(new String("Message : " + Message));
+        out.writeObject(Message);
         out.flush();
         out.close();
 
@@ -115,6 +119,9 @@ public class Node implements Runnable{
 
       try {
         Thread.sleep(this._sleepTime);
+        
+        checkVectorClockSize();
+        
         byte[] buf = new byte[1000];
 
         packet = new DatagramPacket(buf,buf.length);
@@ -131,9 +138,9 @@ public class Node implements Runnable{
 
         ObjectInputStream ois = new ObjectInputStream(bistream);
 
-        String value = (String) ois.readObject();
+        MessageContent value = (MessageContent) ois.readObject();
 
-        _textArea.append(value + "\n");
+        _textArea.append(value._senderName + " " + value._message + "\n");
 
         // ignore packets from myself, print the rest
 
@@ -172,5 +179,23 @@ public class Node implements Runnable{
     public void closeConnection() throws IOException
     {
         this._multicastSocket.leaveGroup(_multicastAddress);
+    }
+    
+    private void checkVectorClockSize()
+    {
+        if(this._localTime== null)
+        {
+            this._localTime = new Integer[Main._nodeSize];
+            for(int i=0; i<this._localTime.length;i++)
+                this._localTime[i]=0;
+        }
+        if(this._localTime.length != Main._nodeSize)
+        {
+            Integer[] newArray=new Integer[Main._nodeSize];
+            arraycopy(this._localTime, 0, newArray, 0, this._localTime.length);
+            for(int i=this._localTime.length; i<newArray.length;i++)
+                newArray[i]=0;
+            this._localTime = newArray;
+        }
     }
 }
