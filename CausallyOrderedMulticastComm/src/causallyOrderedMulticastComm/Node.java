@@ -120,8 +120,6 @@ public class Node implements Runnable{
       try {
         Thread.sleep(this._sleepTime);
         
-        checkVectorClockSize();
-        
         byte[] buf = new byte[1000];
 
         packet = new DatagramPacket(buf,buf.length);
@@ -130,7 +128,7 @@ public class Node implements Runnable{
 
         _multicastSocket.receive(packet);
 
-        
+        checkVectorClockSize();
 
         ByteArrayInputStream bistream = 
 
