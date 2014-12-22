@@ -67,6 +67,7 @@ public class MessageForm {
           public void actionPerformed(ActionEvent e) {
               try {
                   //_textArea.append(_textMessage.getText() + "\n");
+                  _node._localTime[_node._ID-1] = _node._localTime[_node._ID-1] + 1;
                   _node.sendMessage(new MessageContent(_node._nodeName, _textMessage.getText(), _node._localTime));
               } catch (IOException | InterruptedException ex) {
                   Logger.getLogger(MessageForm.class.getName()).log(Level.SEVERE, null, ex);
