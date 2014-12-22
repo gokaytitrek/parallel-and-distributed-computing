@@ -15,12 +15,12 @@ import java.util.ArrayList;
 public class MessageContent implements Serializable{
     public String _message;
     public String _senderName;
-    public Integer[] _localTime;
+    public Integer[] _receivedVectorClock;
 
     public MessageContent(String SenderName, String Message, Integer[] LocalTime) {
         this._senderName = SenderName;
         this._message = Message;
-        this._localTime = LocalTime;
+        this._receivedVectorClock = LocalTime;
         
     }
     
