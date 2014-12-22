@@ -11,5 +11,5 @@ package causallyOrderedMulticastComm;
  */
 public enum VectorResult
 {
-	QUEUED, PROCESSED
+	QUEUED, PROCESSED , DELAYED
 }

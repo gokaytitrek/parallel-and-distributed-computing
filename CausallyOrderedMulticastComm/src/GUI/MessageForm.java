@@ -61,6 +61,25 @@ public class MessageForm {
 
       _textMessage=new JTextField(10);
       JScrollPane _scrollPane = new JScrollPane(_node._textArea); 
+      
+      JButton _buttonHold=new JButton("Hold Next Message");
+      _buttonHold.setSize(100,100);
+      _buttonHold.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+              _node._holdMessage = true;
+          }
+      });     
+      
+      JButton _buttonDeliver=new JButton("Deliver Message");
+      _buttonDeliver.setSize(100,100);
+      _buttonDeliver.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+              _node.deliverVirtuallyQueuedMessage();
+          }
+      }); 
+      
       JButton _button=new JButton("Send Message");
       _button.setSize(100, 100);
       _button.addActionListener(new ActionListener() {
@@ -76,13 +95,15 @@ public class MessageForm {
               }
           }
       });
-      
+    
       _panel.add(new JLabel("Message"));
       _panel.add(_textMessage);
       _panel.add(_button);
       _panel.add(new JLabel("Local Clock"));
       _panel.add(_node._localClockValue);
       _panel.add(_scrollPane);
+      _panel.add(_buttonHold);
+      _panel.add(_buttonDeliver);
       _panel.setLayout(new GridLayout(0, 3));
       
       _mainFrame.add(_panel);

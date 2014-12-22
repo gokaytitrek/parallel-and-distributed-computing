@@ -20,8 +20,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
@@ -38,12 +36,15 @@ public class Node implements Runnable{
 	private int _portNumber;
         public Integer  _ID;
         public Integer[] _localTime;
-        protected ArrayList<Integer[]> _queue;
+        protected ArrayList<MessageContent> _queue;
         private InetAddress _multicastAddress;
         private InetAddress _localHost;
         //private int _sleepTime;
         public JTextArea _textArea;
         public JLabel _localClockValue;
+        
+        public boolean _holdMessage;
+        private ArrayList<MessageContent> _virtualDelayedMessageQueue;
 
     public Node(String Name) throws UnknownHostException {
         
@@ -56,6 +57,7 @@ public class Node implements Runnable{
             this._multicastAddress = InetAddress.getByName("230.0.0.1");
             this._localHost = InetAddress.getLocalHost();
             this._queue = new ArrayList<>();
+            this._virtualDelayedMessageQueue=new ArrayList<>();
           
             _textArea = new JTextArea(1000, 0);
             _textArea.setEditable(false);
@@ -127,7 +129,7 @@ public class Node implements Runnable{
     while (true) {
 
       try {
-        //Thread.sleep(this._sleepTime);
+        //Thread.sleep(5000);
         
         byte[] buf = new byte[1000];
 
@@ -147,17 +149,15 @@ public class Node implements Runnable{
 
         MessageContent value = (MessageContent) ois.readObject();
         
-        ;
-        
-        _textArea.append(value._senderName + " " + value._message + " " + processVectorClock(value._receivedVectorClock,value._ID).toString() + "\n");
+        _textArea.append(value._senderName + " " + value._message + " " + processVectorClock(value).toString() + "\n");
 
         // ignore packets from myself, print the rest
 
         //if (!(packet.getAddress().equals(localHost))) {
 
-          System.out.println(this._nodeName +" Received multicast packet: "+
-
-                           value + " from: " + packet.getAddress());
+//          System.out.println(this._nodeName +" Received multicast packet: "+
+//
+//                           value + " from: " + packet.getAddress());
 
         //} 
 
@@ -178,6 +178,9 @@ public class Node implements Runnable{
         cnfe.printStackTrace(); System.exit(1);
 
       } 
+//      catch (InterruptedException ex) { 
+//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+//        } 
 
     }
 
@@ -206,7 +209,7 @@ public class Node implements Runnable{
         }
     }
     
-    private VectorResult processVectorClock(Integer[] ReceivedVectorClock, Integer ID)
+    private VectorResult processVectorClock(MessageContent Message)
     {
 //        int counter=0;
 //        for (int i=0; i< clock.length ;i++)
@@ -235,44 +238,80 @@ public class Node implements Runnable{
 //            return VectorResult.QUEUED;
 //        }   
         
-        if (Objects.equals(this._ID, ID))
+        if (this._holdMessage)
+        {
+            this._holdMessage = false;
+            this._virtualDelayedMessageQueue.add(Message);
+            return VectorResult.DELAYED;
+        }
+        
+        if (Objects.equals(this._ID, Message._ID))
         {
             this._localClockValue.setText(Arrays.toString(this._localTime));
             return VectorResult.PROCESSED;
         }
         int counter=0;
-        for (int i=0; i< ReceivedVectorClock.length ;i++)
+        for (int i=0; i< Message._receivedVectorClock.length ;i++)
         {
             if(
                     (
                         (
-                            (ReceivedVectorClock[i].equals(this._localTime[i])) || ReceivedVectorClock[i]> this._localTime[i]
+                            (Message._receivedVectorClock[i].equals(this._localTime[i])) || this._localTime[i] > Message._receivedVectorClock[i]
                         ) 
-                        && i!=ID
+                        && i!=Message._ID
                     )
                     &&
-                    ReceivedVectorClock[ID] == this._localTime[ID]+1
+                    Message._receivedVectorClock[Message._ID] == this._localTime[Message._ID]+1
               )
             {
                 counter++;
                 //this._localTime[i] = max(this._localTime[i],ReceivedVectorClock[i]);
             }
-            else if (i!=ID)
+            else if (i!=Message._ID)
             {
                 this._localClockValue.setText(Arrays.toString(this._localTime));
-                this._queue.add(ReceivedVectorClock);
+                
+                this._queue.add(Message);
                 return VectorResult.QUEUED;
             }
         }
         
-        if(counter == ReceivedVectorClock.length-1)
+        if(counter == Message._receivedVectorClock.length-1)
         {
-            for (int i=0; i< ReceivedVectorClock.length ;i++)
+            for (int i=0; i< Message._receivedVectorClock.length ;i++)
             {
-                this._localTime[i] = max(this._localTime[i],ReceivedVectorClock[i]);
+                this._localTime[i] = max(this._localTime[i],Message._receivedVectorClock[i]);
             }
         }
         this._localClockValue.setText(Arrays.toString(this._localTime));
         return VectorResult.PROCESSED;
+    }
+    
+    public void deliverVirtuallyQueuedMessage()
+    {
+        ArrayList<MessageContent> temp=new ArrayList<>();
+        for (MessageContent i : this._virtualDelayedMessageQueue) {
+            VectorResult vr=processVectorClock(i);
+            _textArea.append(i._senderName + " " + i._message + " " + vr.toString() + "\n");
+            if(VectorResult.PROCESSED == vr)
+                temp.add(i);
+        }
+        for (MessageContent i : temp) 
+            this._virtualDelayedMessageQueue.remove(i);
+        
+        deliverQueuedMessage();
+    }
+    
+    public void deliverQueuedMessage()
+    {
+        ArrayList<MessageContent> temp=new ArrayList<>();
+        for (MessageContent i : this._queue) {
+            VectorResult vr=processVectorClock(i);
+            _textArea.append(i._senderName + " " + i._message + " " + vr.toString() + "\n");
+            if(VectorResult.PROCESSED == vr)
+                temp.add(i);
+        }
+        for (MessageContent i : temp) 
+            this._queue.remove(i);
     }
 }
