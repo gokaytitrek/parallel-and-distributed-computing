@@ -18,8 +18,11 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
 
@@ -29,24 +32,26 @@ import javax.swing.JTextArea;
  */
 public class Node implements Runnable{
     	private static final String _serverName = "localhost";
-	private InetAddress _group;
+	private final InetAddress _group;
         private MulticastSocket _multicastSocket;
 	public String _nodeName;
-	private int _portNumber = 6000;
+	private int _portNumber;
         public Integer  _ID;
         public Integer[] _localTime;
         protected ArrayList<Integer[]> _queue;
         private InetAddress _multicastAddress;
         private InetAddress _localHost;
-        private int _sleepTime;
+        //private int _sleepTime;
         public JTextArea _textArea;
+        public JLabel _localClockValue;
 
-    public Node(String Name,int SleepTime) throws UnknownHostException {
+    public Node(String Name) throws UnknownHostException {
         
-            this._ID = ++Main._nodeSize;
+            this._ID = Main._nodeSize++;
             checkVectorClockSize();
             this._nodeName = Name;
-            this._sleepTime = SleepTime;
+            //this._sleepTime = SleepTime;
+            this._portNumber = 6000;
             this._group = InetAddress.getByName("228.5.6.7");
             this._multicastAddress = InetAddress.getByName("230.0.0.1");
             this._localHost = InetAddress.getLocalHost();
@@ -54,10 +59,12 @@ public class Node implements Runnable{
           
             _textArea = new JTextArea(1000, 0);
             _textArea.setEditable(false);
+            _localClockValue = new JLabel();
     }
     
     public void sendMessage(MessageContent Message) throws IOException, InterruptedException
     {
+        checkVectorClockSize();
         DatagramSocket dgramSocket = new DatagramSocket();
         DatagramPacket packet = null;
       try {
@@ -120,7 +127,7 @@ public class Node implements Runnable{
     while (true) {
 
       try {
-        Thread.sleep(this._sleepTime);
+        //Thread.sleep(this._sleepTime);
         
         byte[] buf = new byte[1000];
 
@@ -142,7 +149,7 @@ public class Node implements Runnable{
         
         ;
         
-        _textArea.append(value._senderName + " " + value._message + " " + processVectorClock(value._receivedVectorClock).toString() + "\n");
+        _textArea.append(value._senderName + " " + value._message + " " + processVectorClock(value._receivedVectorClock,value._ID).toString() + "\n");
 
         // ignore packets from myself, print the rest
 
@@ -170,9 +177,7 @@ public class Node implements Runnable{
 
         cnfe.printStackTrace(); System.exit(1);
 
-      } catch (InterruptedException ex) {
-            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      } 
 
     }
 
@@ -201,33 +206,73 @@ public class Node implements Runnable{
         }
     }
     
-    private VectorResult processVectorClock(Integer[] clock)
+    private VectorResult processVectorClock(Integer[] ReceivedVectorClock, Integer ID)
     {
-        int counter=0;
-        for (int i=0; i< clock.length ;i++)
+//        int counter=0;
+//        for (int i=0; i< clock.length ;i++)
+//        {
+//            if((clock[i]-this._localTime[i]) != 0)
+//            {
+//                counter++;
+//                if((clock[i]-this._localTime[i])>1)
+//                  counter++;
+//            }
+//        }
+//        
+//        if(counter == 0)
+//            return VectorResult.PROCESSED;
+//        else if(counter == 1)
+//        {
+//            for (int i=0; i< clock.length ;i++)
+//            {
+//                this._localTime[i] = max(this._localTime[i],clock[i]);
+//            }            
+//            return VectorResult.PROCESSED;
+//        }
+//        else 
+//        {
+//            this._queue.add(clock);
+//            return VectorResult.QUEUED;
+//        }   
+        
+        if (Objects.equals(this._ID, ID))
         {
-            if((clock[i]-this._localTime[i]) != 0)
+            this._localClockValue.setText(Arrays.toString(this._localTime));
+            return VectorResult.PROCESSED;
+        }
+        int counter=0;
+        for (int i=0; i< ReceivedVectorClock.length ;i++)
+        {
+            if(
+                    (
+                        (
+                            (ReceivedVectorClock[i].equals(this._localTime[i])) || ReceivedVectorClock[i]> this._localTime[i]
+                        ) 
+                        && i!=ID
+                    )
+                    &&
+                    ReceivedVectorClock[ID] == this._localTime[ID]+1
+              )
             {
                 counter++;
-                if((clock[i]-this._localTime[i])>1)
-                  counter++;
+                //this._localTime[i] = max(this._localTime[i],ReceivedVectorClock[i]);
+            }
+            else if (i!=ID)
+            {
+                this._localClockValue.setText(Arrays.toString(this._localTime));
+                this._queue.add(ReceivedVectorClock);
+                return VectorResult.QUEUED;
             }
         }
         
-        if(counter == 0)
-            return VectorResult.PROCESSED;
-        else if(counter == 1)
+        if(counter == ReceivedVectorClock.length-1)
         {
-            for (int i=0; i< clock.length ;i++)
+            for (int i=0; i< ReceivedVectorClock.length ;i++)
             {
-                this._localTime[i] = max(this._localTime[i],clock[i]);
-            }            
-            return VectorResult.PROCESSED;
+                this._localTime[i] = max(this._localTime[i],ReceivedVectorClock[i]);
+            }
         }
-        else 
-        {
-            this._queue.add(clock);
-            return VectorResult.QUEUED;
-        }   
+        this._localClockValue.setText(Arrays.toString(this._localTime));
+        return VectorResult.PROCESSED;
     }
 }

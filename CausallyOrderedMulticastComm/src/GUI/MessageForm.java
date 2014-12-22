@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import static java.lang.System.arraycopy;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,9 +33,9 @@ public class MessageForm {
     private JTextField _textMessage;
     private JPanel _panel;
     private Node _node;
-    public MessageForm(String Name,Integer SleepTime) throws UnknownHostException
+    public MessageForm(String Name) throws UnknownHostException
     {
-         _node=new Node(Name, SleepTime);
+         _node=new Node(Name);
         (new Thread(_node)).start();
         _mainFrame = new JFrame(Name);
         prepareGUI();
@@ -67,8 +68,9 @@ public class MessageForm {
           public void actionPerformed(ActionEvent e) {
               try {
                   //_textArea.append(_textMessage.getText() + "\n");
-                  _node._localTime[_node._ID-1] = _node._localTime[_node._ID-1] + 1;
-                  _node.sendMessage(new MessageContent(_node._nodeName, _textMessage.getText(), _node._localTime));
+                  _node._localTime[_node._ID] = _node._localTime[_node._ID] + 1;
+                  checkVectorClockSize();
+                  _node.sendMessage(new MessageContent(_node._ID,_node._nodeName, _textMessage.getText(), _node._localTime));
               } catch (IOException | InterruptedException ex) {
                   Logger.getLogger(MessageForm.class.getName()).log(Level.SEVERE, null, ex);
               }
@@ -78,12 +80,32 @@ public class MessageForm {
       _panel.add(new JLabel("Message"));
       _panel.add(_textMessage);
       _panel.add(_button);
+      _panel.add(new JLabel("Local Clock"));
+      _panel.add(_node._localClockValue);
       _panel.add(_scrollPane);
       _panel.setLayout(new GridLayout(0, 3));
       
       _mainFrame.add(_panel);
       _mainFrame.setVisible(true);  
 
+    }
+    
+    private void checkVectorClockSize()
+    {
+        if(_node._localTime== null)
+        {
+            _node._localTime = new Integer[Main._nodeSize];
+            for(int i=0; i<_node._localTime.length;i++)
+                _node._localTime[i]=0;
+        }
+        if(_node._localTime.length != Main._nodeSize)
+        {
+            Integer[] newArray=new Integer[Main._nodeSize];
+            arraycopy(_node._localTime, 0, newArray, 0, _node._localTime.length);
+            for(int i=_node._localTime.length; i<newArray.length;i++)
+                newArray[i]=0;
+            _node._localTime = newArray;
+        }
     }
     
     
