@@ -20,7 +20,7 @@ import javax.swing.*;
 public class MainForm {
     private JFrame _mainFrame;
     private JTextField _textName;
-    private JTextField _textSleepTime;
+    //private JTextField _textSleepTime;
     private JPanel _panel;
     
     public MainForm()
@@ -39,22 +39,23 @@ public class MainForm {
       });    
       
       _textName=new JTextField(10);
-      _textSleepTime=new JTextField(4);
+      //_textSleepTime=new JTextField(4);
       
       _panel = new JPanel();
       _panel.setLayout(new FlowLayout());
       
       _panel.add(new JLabel("Name"));
       _panel.add(_textName);
-      _panel.add(new JLabel("Sleep Time"));
-      _panel.add(_textSleepTime);
+//      _panel.add(new JLabel("Sleep Time"));
+//      _panel.add(_textSleepTime);
       JButton _button=new JButton("Create Node");
       _button.addActionListener(new ActionListener() {
 
           @Override
           public void actionPerformed(ActionEvent e) {
               try {
-                  MessageForm messageForm = new MessageForm(_textName.getText(), Integer.parseInt(_textSleepTime.getText()));    
+                  //MessageForm messageForm = new MessageForm(_textName.getText(), Integer.parseInt(_textSleepTime.getText()));
+                  MessageForm messageForm = new MessageForm(_textName.getText());
               } catch (UnknownHostException ex) {
                   Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
               }
