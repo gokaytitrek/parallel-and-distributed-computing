@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -49,6 +50,7 @@ public class Node implements Runnable{
             this._group = InetAddress.getByName("228.5.6.7");
             this._multicastAddress = InetAddress.getByName("230.0.0.1");
             this._localHost = InetAddress.getLocalHost();
+            this._queue = new ArrayList<>();
           
             _textArea = new JTextArea(1000, 0);
             _textArea.setEditable(false);
@@ -137,8 +139,10 @@ public class Node implements Runnable{
         ObjectInputStream ois = new ObjectInputStream(bistream);
 
         MessageContent value = (MessageContent) ois.readObject();
-
-        _textArea.append(value._senderName + " " + value._message + "\n");
+        
+        ;
+        
+        _textArea.append(value._senderName + " " + value._message + " " + processVectorClock(value._receivedVectorClock).toString() + "\n");
 
         // ignore packets from myself, print the rest
 
@@ -195,5 +199,35 @@ public class Node implements Runnable{
                 newArray[i]=0;
             this._localTime = newArray;
         }
+    }
+    
+    private VectorResult processVectorClock(Integer[] clock)
+    {
+        int counter=0;
+        for (int i=0; i< clock.length ;i++)
+        {
+            if((clock[i]-this._localTime[i]) != 0)
+            {
+                counter++;
+                if((clock[i]-this._localTime[i])>1)
+                  counter++;
+            }
+        }
+        
+        if(counter == 0)
+            return VectorResult.PROCESSED;
+        else if(counter == 1)
+        {
+            for (int i=0; i< clock.length ;i++)
+            {
+                this._localTime[i] = max(this._localTime[i],clock[i]);
+            }            
+            return VectorResult.PROCESSED;
+        }
+        else 
+        {
+            this._queue.add(clock);
+            return VectorResult.QUEUED;
+        }   
     }
 }
