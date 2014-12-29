@@ -6,6 +6,8 @@
 package totallyorderedmulticast;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,8 +33,13 @@ public class OverlayNetwork {
     {
         for(int i=0; i<SIZEOFNETWORK;i++)
         {
-            Node node=new Node(i, SIZEOFNETWORK, this._portNumbers);
-            (new Thread(node)).start();
+            try {
+                Node node=new Node(i, SIZEOFNETWORK, this._portNumbers);
+                (new Thread(node)).start();
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(OverlayNetwork.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     

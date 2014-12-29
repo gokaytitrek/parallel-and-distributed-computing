@@ -9,12 +9,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import socketprogramming.ServerThread;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messageContent.MessageContent;
@@ -30,10 +31,9 @@ public class Node implements Runnable{
     private boolean _firstNode;
     private boolean _lastNode;
     protected ServerSocket _serverSocket;
-    protected Socket _clientSocket;
-    protected ObjectOutputStream _socketOut;
-    protected BufferedReader _socketIn;
+
     private int _portNumber;
+    private HashMap<Integer,MySocket> _socketMap;
     
     
     public Node(int ID,int NumbefOfProcess,ArrayList<Integer> PortNumbers)
@@ -44,12 +44,14 @@ public class Node implements Runnable{
         this._firstNode = false;
         this._lastNode = false;
         this._portNumber = this._portNumbers.get(_id);
+        this._socketMap = new HashMap<>();
         
         if(this._id == 0)
            this._firstNode = true;
         
         if(this._id == this._numberOfProcess-1)
             this._lastNode = true;
+        
     }
 
     @Override
@@ -72,49 +74,50 @@ public class Node implements Runnable{
             }
             
         }
+        
+        //sendMessage();
     }
     
     synchronized public void connectOtherNode(int PortNumber) throws IOException
     {
-        try {
-                //create socket and connect to the server
-                _clientSocket = new Socket(_serverName, PortNumber);
-                //will use socketOut to send text to the server over the socket
-                //socketOut = new PrintWriter(_clientSocket.getOutputStream(), true);
-                _socketOut = new ObjectOutputStream(_clientSocket.getOutputStream());
-                //will use socketIn to receive text from the server over the socket
-                _socketIn = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
-        } catch(UnknownHostException e) { //if serverName cannot be resolved to an address
-                System.out.println("Who is " + _serverName + "?");
-                e.printStackTrace();
-                System.exit(0);
-        } catch (IOException e) {
-                System.out.println("Cannot get I/O for the connection.");
-                e.printStackTrace();
-                System.exit(0);
-        }
-        String message=   "try to connect: Ports: " +  this._portNumber + " -> " +PortNumber;
-        _socketOut.writeObject(new MessageContent());
-        System.out.println(message);
-        String response = null;
-        try {
-                response = _socketIn.readLine();
-        } catch (IOException e) {
-                e.printStackTrace();
-        }
-        //System.out.println("Server's response was: \n\t\"" + response + "\"");
-        System.out.println(response);
-        System.out.println();
+        Socket clientSocket = new Socket(_serverName, PortNumber);
         
-        //sendMessage();
-
+        BufferedReader socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+   
+        ObjectOutputStream socketOut = new ObjectOutputStream(clientSocket.getOutputStream());
+        this._socketMap.put(PortNumber, new MySocket(clientSocket, socketOut, socketIn));
+        
+        String message=   "try to connect: Ports: " +  this._portNumber + " -> " +PortNumber;
+        socketOut.writeObject(new MessageContent(0,"","Connect"));
+        System.out.println(message);
+        String response = socketIn.readLine();
+        //System.out.println("Server's response was: \n\t\"" + response + "\"");
+        //System.out.println(response);
     }
     
      synchronized public void sendMessage()
      {
+        //System.out.println("Sender:" + this._id);
         try {
-            MessageContent message=new MessageContent(_id, _serverName, "deneme");
-            _socketOut.writeObject(message);
+            for (Map.Entry<Integer, MySocket> entrySet : _socketMap.entrySet()) {
+                Integer port= entrySet.getKey();
+                MySocket value = entrySet.getValue();
+                //value._socketOut.reset();
+                //value._socketOut = new ObjectOutputStream(value._clientSocket.getOutputStream());
+                MessageContent message=new MessageContent(_id, _serverName, port + " nolu porta " + this._portNumber + " nolu porttan mesaj atılıyor." );
+                value._socketOut.writeObject(message);
+                String response = null;
+                try {
+                        response = value._socketIn.readLine();
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+                //System.out.println("Server's response was: \n\t\"" + response + "\"");
+                System.out.println(response);
+                System.out.println();
+            }
+            
+            
         } catch (IOException ex) {
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
         }

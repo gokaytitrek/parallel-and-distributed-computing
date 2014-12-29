@@ -12,42 +12,25 @@ import java.util.logging.Logger;
 import messageContent.MessageContent;
 
 public class WorkerThread implements Runnable{
-	private Socket clientSocket;
-        private String name;
-	public WorkerThread(Socket s,String name) {
-		clientSocket = s;
-                this.name = name;
+	private Socket _clientSocket;
+        private String _name;
+        private Integer _portNumber;
+	public WorkerThread(Socket Socket,String Name,Integer PortNumber) {
+		this._clientSocket = Socket;
+                this._name = Name;
+                this._portNumber = PortNumber;
 	}
 	public void run() {
 		//taken from Server4SingleClient
 		PrintWriter socketOut = null;
 		ObjectInputStream socketIn = null;
-                
-                /*
-                        byte[] buf = new byte[1000];
 
-                    packet = new DatagramPacket(buf,buf.length);
-
-                    //System.out.println("McastReceiver: waiting for packet");
-
-                    _multicastSocket.receive(packet);
-
-                    checkVectorClockSize();
-
-                    ByteArrayInputStream bistream = 
-
-                      new ByteArrayInputStream(packet.getData());
-
-                    ObjectInputStream ois = new ObjectInputStream(bistream);
-
-                    MessageContent value = (MessageContent) ois.readObject();
-                */
 		
 		try {			
 			//will use socketOut to send text to the server over the socket
-			socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
+			socketOut = new PrintWriter(_clientSocket.getOutputStream(), true);
 			//will use socketIn to receive text from the server over the socket
-			socketIn = new ObjectInputStream(clientSocket.getInputStream());
+			socketIn = new ObjectInputStream(_clientSocket.getInputStream());
                       
 		} catch (IOException e) {
 			System.out.println("Cannot get I/O for the connection.");
@@ -70,7 +53,7 @@ public class WorkerThread implements Runnable{
                 while (x) {                
                     //System.out.println("Round (" + (i+1) + ")");
                     //System.out.println("Waiting for a message from the client.");
-                    
+                    //System.out.println("Thread Port Number" + this._portNumber);
                     try {
                             message = (MessageContent)socketIn.readObject();
                     } catch (IOException e) {
@@ -84,14 +67,14 @@ public class WorkerThread implements Runnable{
                         socketOut.println("Connection Closed");
                         x=false;
                     } 
-                    socketOut.println("You said: " + message._message);
+                    
                     if(message.equals("NextPort"))
-                        socketOut.println(clientSocket.getLocalPort());
+                        socketOut.println(_clientSocket.getLocalPort());
                     else if(message.equals("NextName"))
-                        socketOut.println(this.name);
+                        socketOut.println(this._name);
                     else
                     {
-                        socketOut.println("Connected");
+                        socketOut.println(message._message);
                         //System.out.println();
                     }
                 }
@@ -101,7 +84,7 @@ public class WorkerThread implements Runnable{
 		
 		try {
 			socketIn.close();
-			clientSocket.close();
+			_clientSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -24,7 +24,7 @@ public class ServerThread implements Runnable{
             try {
                     //initialize server socket
                     _serverSocket = new ServerSocket(_portNumber);
-                    System.out.println("Server socket initialized.\n");
+                    System.out.println("Server socket initialized. Port: "+ _portNumber );
             } catch (IOException e) { //if this port is busy, an IOException is fired
                     System.out.println("Cannot listen on port " + _portNumber);
                     e.printStackTrace();
@@ -50,7 +50,7 @@ public class ServerThread implements Runnable{
                             //System.out.println();
 
                             //assign a worker thread
-                            WorkerThread w = new WorkerThread(clientSocket,_name);
+                            WorkerThread w = new WorkerThread(clientSocket,_name,this._portNumber);
                             new Thread(w).start();
                     }
             } finally {
