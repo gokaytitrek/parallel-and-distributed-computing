@@ -3,7 +3,6 @@ package socketprogramming;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import socketprogramming.WorkerThread;
 
 public class ServerThread implements Runnable{
 	//the port on which server will listen for connections 

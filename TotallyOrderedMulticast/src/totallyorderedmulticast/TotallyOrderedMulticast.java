@@ -15,7 +15,7 @@ public class TotallyOrderedMulticast {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        OverlayNetwork overlayNetwork=new OverlayNetwork(4);
+        OverlayNetwork overlayNetwork=new OverlayNetwork(6);
         overlayNetwork.create();
     }
     

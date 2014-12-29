@@ -1,12 +1,9 @@
 package socketprogramming;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messageContent.MessageContent;
@@ -68,10 +65,12 @@ public class WorkerThread implements Runnable{
                         x=false;
                     } 
                     
-                    if(message.equals("NextPort"))
+                    if(message._message.equals("NextPort"))
                         socketOut.println(_clientSocket.getLocalPort());
-                    else if(message.equals("NextName"))
+                    else if(message._message.equals("NextName"))
                         socketOut.println(this._name);
+                    else if(message._message.equals("Connect"))
+                        socketOut.println("Connected");
                     else
                     {
                         socketOut.println(message._message);

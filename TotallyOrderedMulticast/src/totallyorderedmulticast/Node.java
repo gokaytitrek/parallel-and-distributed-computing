@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import socketprogramming.ServerThread;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +30,9 @@ public class Node implements Runnable{
     private boolean _firstNode;
     private boolean _lastNode;
     protected ServerSocket _serverSocket;
-
     private int _portNumber;
     private HashMap<Integer,MySocket> _socketMap;
+    protected ArrayList<MessageContent> _queue;
     
     
     public Node(int ID,int NumbefOfProcess,ArrayList<Integer> PortNumbers)
@@ -92,7 +91,7 @@ public class Node implements Runnable{
         System.out.println(message);
         String response = socketIn.readLine();
         //System.out.println("Server's response was: \n\t\"" + response + "\"");
-        //System.out.println(response);
+        System.out.println(response);
     }
     
      synchronized public void sendMessage()
@@ -104,7 +103,7 @@ public class Node implements Runnable{
                 MySocket value = entrySet.getValue();
                 //value._socketOut.reset();
                 //value._socketOut = new ObjectOutputStream(value._clientSocket.getOutputStream());
-                MessageContent message=new MessageContent(_id, _serverName, port + " nolu porta " + this._portNumber + " nolu porttan mesaj atılıyor." );
+                MessageContent message=new MessageContent(_id, _serverName,"Send Message from : "+this._portNumber+ " to : " + port );
                 value._socketOut.writeObject(message);
                 String response = null;
                 try {
@@ -114,7 +113,7 @@ public class Node implements Runnable{
                 }
                 //System.out.println("Server's response was: \n\t\"" + response + "\"");
                 System.out.println(response);
-                System.out.println();
+                //System.out.println();
             }
             
             
